@@ -65,6 +65,24 @@ public class ProductSpuRespVO {
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 
+    // ========== 商品来源与溯源字段 =========
+
+    @Schema(description = "商品来源类型：0=自有商品，1=第三方平台", example = "0")
+    private Integer sourceType;
+
+    @Schema(description = "第三方平台配置编号", example = "1")
+    private Long sourcePlatformId;
+
+    @Schema(description = "第三方平台标识", example = "1688")
+    private String sourcePlatformCode;
+
+    @Schema(description = "第三方平台商品编号", example = "6823948123")
+    private String sourceProductId;
+
+    @Schema(description = "商品来源 URL", example = "https://detail.1688.com/offer/6823948123.html")
+    @ExcelProperty("商品来源URL")
+    private String sourceUrl;
+
     // ========== SKU 相关字段 =========
 
     @Schema(description = "规格类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "true")

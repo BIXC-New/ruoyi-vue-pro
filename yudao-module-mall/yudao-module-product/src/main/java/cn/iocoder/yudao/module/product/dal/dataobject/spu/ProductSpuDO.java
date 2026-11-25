@@ -88,6 +88,31 @@ public class ProductSpuDO extends BaseDO {
      */
     private Integer status;
 
+    // ========== 商品来源与溯源字段 =========
+
+    /**
+     * 商品来源类型
+     *
+     * 枚举 {@link cn.iocoder.yudao.module.product.enums.source.ProductSourceTypeEnum}
+     */
+    private Integer sourceType;
+    /**
+     * 第三方平台配置编号
+     */
+    private Long sourcePlatformId;
+    /**
+     * 第三方平台标识
+     */
+    private String sourcePlatformCode;
+    /**
+     * 第三方平台商品编号
+     */
+    private String sourceProductId;
+    /**
+     * 商品来源 URL
+     */
+    private String sourceUrl;
+
     // ========== SKU 相关字段 =========
 
     /**

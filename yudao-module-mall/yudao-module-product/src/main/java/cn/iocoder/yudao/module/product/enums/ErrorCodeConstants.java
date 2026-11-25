@@ -55,4 +55,13 @@ public interface ErrorCodeConstants {
     ErrorCode FAVORITE_EXISTS = new ErrorCode(1_008_008_000, "该商品已经被收藏");
     ErrorCode FAVORITE_NOT_EXISTS = new ErrorCode(1_008_008_001, "商品收藏不存在");
 
+    // ========== 商品第三方来源平台与采集 1-008-009-000 ==========
+    ErrorCode SOURCE_PLATFORM_NOT_EXISTS = new ErrorCode(1_008_009_000, "第三方平台配置不存在");
+    ErrorCode SOURCE_PLATFORM_DISABLED = new ErrorCode(1_008_009_001, "第三方平台配置【{}】已禁用");
+    ErrorCode SOURCE_URL_INVALID = new ErrorCode(1_008_009_002, "商品来源 URL 不合法");
+    ErrorCode SOURCE_ADAPTER_NOT_FOUND = new ErrorCode(1_008_009_003, "未找到匹配的平台采集适配器（平台：{}，方式：{}）");
+    ErrorCode SOURCE_FETCH_FAILED = new ErrorCode(1_008_009_004, "获取第三方商品信息失败：{}");
+    ErrorCode SOURCE_API_PAYLOAD_INVALID = new ErrorCode(1_008_009_005, "第三方 API 报文解析失败：{}");
+    ErrorCode SOURCE_API_AUTH_INCOMPLETE = new ErrorCode(1_008_009_006, "API 模式必须配置平台接口 URL 与授权信息（AppKey 或 AccessToken）");
+
 }

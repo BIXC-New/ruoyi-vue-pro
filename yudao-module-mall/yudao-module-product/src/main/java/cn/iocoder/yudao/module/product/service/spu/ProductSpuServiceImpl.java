@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.product.service.spu;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
@@ -13,12 +14,16 @@ import cn.iocoder.yudao.module.product.controller.admin.spu.vo.ProductSpuSaveReq
 import cn.iocoder.yudao.module.product.controller.admin.spu.vo.ProductSpuUpdateStatusReqVO;
 import cn.iocoder.yudao.module.product.controller.app.spu.vo.AppProductSpuPageReqVO;
 import cn.iocoder.yudao.module.product.dal.dataobject.category.ProductCategoryDO;
+import cn.iocoder.yudao.module.product.dal.dataobject.source.ProductSourcePlatformDO;
 import cn.iocoder.yudao.module.product.dal.dataobject.spu.ProductSpuDO;
 import cn.iocoder.yudao.module.product.dal.mysql.spu.ProductSpuMapper;
+import cn.iocoder.yudao.module.product.enums.source.ProductSourceTypeEnum;
 import cn.iocoder.yudao.module.product.enums.spu.ProductSpuStatusEnum;
+import cn.iocoder.yudao.module.product.framework.source.util.SourceUrlValidator;
 import cn.iocoder.yudao.module.product.service.brand.ProductBrandService;
 import cn.iocoder.yudao.module.product.service.category.ProductCategoryService;
 import cn.iocoder.yudao.module.product.service.sku.ProductSkuService;
+import cn.iocoder.yudao.module.product.service.source.ProductSourcePlatformService;
 import com.google.common.collect.Maps;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
@@ -52,6 +57,8 @@ public class ProductSpuServiceImpl implements ProductSpuService {
     private ProductBrandService brandService;
     @Resource
     private ProductCategoryService categoryService;
+    @Resource
+    private ProductSourcePlatformService sourcePlatformService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -64,6 +71,7 @@ public class ProductSpuServiceImpl implements ProductSpuService {
         productSkuService.validateSkuList(skuSaveReqList, createReqVO.getSpecType());
 
         ProductSpuDO spu = BeanUtils.toBean(createReqVO, ProductSpuDO.class);
+        initAndValidateSource(spu);
         // 初始化 SPU 中 SKU 相关属性
         initSpuFromSkus(spu, skuSaveReqList);
         // 插入 SPU
@@ -88,10 +96,34 @@ public class ProductSpuServiceImpl implements ProductSpuService {
 
         // 更新 SPU
         ProductSpuDO updateObj = BeanUtils.toBean(updateReqVO, ProductSpuDO.class).setStatus(spu.getStatus());
+        initAndValidateSource(updateObj);
         initSpuFromSkus(updateObj, skuSaveReqList);
         productSpuMapper.updateById(updateObj);
         // 批量更新 SKU
         productSkuService.updateSkuList(updateObj.getId(), updateReqVO.getSkus());
+    }
+
+    /**
+     * 校验并补全商品来源与溯源 URL 字段
+     */
+    private void initAndValidateSource(ProductSpuDO spu) {
+        if (spu.getSourceType() == null) {
+            spu.setSourceType(StrUtil.isNotBlank(spu.getSourceUrl()) || spu.getSourcePlatformId() != null
+                    ? ProductSourceTypeEnum.THIRD_PARTY.getType()
+                    : ProductSourceTypeEnum.OWN.getType());
+        }
+        if (StrUtil.isNotBlank(spu.getSourceUrl())) {
+            SourceUrlValidator.validateHttpUrlSyntax(spu.getSourceUrl());
+            if (StrUtil.isBlank(spu.getSourceProductId())) {
+                spu.setSourceProductId(SourceUrlValidator.extractProductId(spu.getSourcePlatformCode(), spu.getSourceUrl()));
+            }
+        }
+        if (spu.getSourcePlatformId() != null) {
+            ProductSourcePlatformDO platform = sourcePlatformService.validatePlatformExists(spu.getSourcePlatformId());
+            if (platform != null && StrUtil.isBlank(spu.getSourcePlatformCode())) {
+                spu.setSourcePlatformCode(platform.getPlatformCode());
+            }
+        }
     }
 
     /**

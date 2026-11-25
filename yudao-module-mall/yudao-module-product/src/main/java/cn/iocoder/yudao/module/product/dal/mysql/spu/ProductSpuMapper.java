@@ -42,6 +42,8 @@ public interface ProductSpuMapper extends BaseMapperX<ProductSpuDO> {
         LambdaQueryWrapperX<ProductSpuDO> queryWrapper = new LambdaQueryWrapperX<ProductSpuDO>()
                 .likeIfPresent(ProductSpuDO::getName, reqVO.getName())
                 .eqIfPresent(ProductSpuDO::getCategoryId, reqVO.getCategoryId())
+                .eqIfPresent(ProductSpuDO::getSourceType, reqVO.getSourceType())
+                .eqIfPresent(ProductSpuDO::getSourcePlatformCode, reqVO.getSourcePlatformCode())
                 .betweenIfPresent(ProductSpuDO::getCreateTime, reqVO.getCreateTime())
                 .orderByDesc(ProductSpuDO::getSort)
                 .orderByDesc(ProductSpuDO::getId);
@@ -158,9 +160,21 @@ public interface ProductSpuMapper extends BaseMapperX<ProductSpuDO> {
         LambdaQueryWrapperX<ProductSpuDO> queryWrapper = new LambdaQueryWrapperX<ProductSpuDO>()
                 .likeIfPresent(ProductSpuDO::getName, reqVO.getName())
                 .eqIfPresent(ProductSpuDO::getCategoryId, reqVO.getCategoryId())
+                .eqIfPresent(ProductSpuDO::getSourceType, reqVO.getSourceType())
+                .eqIfPresent(ProductSpuDO::getSourcePlatformCode, reqVO.getSourcePlatformCode())
                 .betweenIfPresent(ProductSpuDO::getCreateTime, reqVO.getCreateTime());
         appendTabQuery(tabType, queryWrapper);
         return selectCount(queryWrapper);
+    }
+
+    /**
+     * 根据第三方平台商品编号查询第一条未删除 SPU（租户隔离由 MyBatis-Plus 自动注入）
+     */
+    default ProductSpuDO selectFirstBySourceProductId(String sourceProductId) {
+        return selectOne(new LambdaQueryWrapperX<ProductSpuDO>()
+                .eq(ProductSpuDO::getSourceProductId, sourceProductId)
+                .orderByDesc(ProductSpuDO::getId)
+                .last("LIMIT 1"));
     }
 
     /**

@@ -61,6 +61,10 @@ public class ProductSkuDO extends BaseDO {
      */
     private String barCode;
     /**
+     * 第三方平台 SKU 编号
+     */
+    private String sourceSkuId;
+    /**
      * 图片地址
      */
     private String picUrl;

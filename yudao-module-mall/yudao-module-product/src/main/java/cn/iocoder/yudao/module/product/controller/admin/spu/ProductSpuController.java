@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.product.dal.dataobject.sku.ProductSkuDO;
 import cn.iocoder.yudao.module.product.dal.dataobject.spu.ProductSpuDO;
 import cn.iocoder.yudao.module.product.enums.spu.ProductSpuStatusEnum;
 import cn.iocoder.yudao.module.product.service.sku.ProductSkuService;
+import cn.iocoder.yudao.module.product.service.source.ProductSourceImportService;
 import cn.iocoder.yudao.module.product.service.spu.ProductSpuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,6 +43,15 @@ public class ProductSpuController {
     private ProductSpuService productSpuService;
     @Resource
     private ProductSkuService productSkuService;
+    @Resource
+    private ProductSourceImportService productSourceImportService;
+
+    @PostMapping("/import-preview")
+    @Operation(summary = "从第三方平台采集商品信息（预览回填）")
+    @PreAuthorize("@ss.hasPermission('product:spu:import') or @ss.hasPermission('product:spu:create')")
+    public CommonResult<ProductSpuImportRespVO> importPreview(@Valid @RequestBody ProductSpuImportReqVO reqVO) {
+        return success(productSourceImportService.importPreview(reqVO));
+    }
 
     @PostMapping("/create")
     @Operation(summary = "创建商品 SPU")
