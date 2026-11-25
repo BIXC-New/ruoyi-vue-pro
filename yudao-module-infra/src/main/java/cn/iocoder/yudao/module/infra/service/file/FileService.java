@@ -16,6 +16,8 @@ import java.util.List;
  * @author 芋道源码
  */
 public interface FileService {
+    List<FileDO> getFileListByUrls(java.util.Collection<String> urls);
+
 
     /**
      * 获得文件分页

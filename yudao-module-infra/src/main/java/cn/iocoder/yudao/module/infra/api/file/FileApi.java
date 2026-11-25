@@ -1,8 +1,12 @@
 package cn.iocoder.yudao.module.infra.api.file;
 
+import cn.iocoder.yudao.module.infra.api.file.dto.FileResourceRespDTO;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
+
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -11,6 +15,9 @@ import java.util.List;
  * @author 芋道源码
  */
 public interface FileApi {
+    /** 批量读取已归档图片，未归档的 URL 不处理。最多 100 张、单张 5MB、总量 64MB。 */
+    List<FileResourceRespDTO> getImageResources(Collection<String> urls) throws Exception;
+
 
     /**
      * 保存文件，并返回文件的访问路径

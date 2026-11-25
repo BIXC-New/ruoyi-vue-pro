@@ -34,6 +34,7 @@ public interface ErrorCodeConstants {
     ErrorCode FILE_NOT_EXISTS = new ErrorCode(1_001_003_001, "文件不存在");
     ErrorCode FILE_IS_EMPTY = new ErrorCode(1_001_003_002, "文件为空");
     ErrorCode FILE_PATH_INVALID = new ErrorCode(1_001_003_003, "文件路径不正确");
+    ErrorCode FILE_RESOURCE_LIMIT = new ErrorCode(1_001_003_005, "图片资源数量或大小超过导出限制");
     ErrorCode FILE_TYPE_NOT_ALLOWED = new ErrorCode(1_001_003_004, "不支持的文件类型");
 
     // ========== 代码生成器 1-001-004-000 ==========

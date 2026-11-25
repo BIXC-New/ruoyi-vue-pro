@@ -8,6 +8,8 @@ import cn.iocoder.yudao.module.promotion.dal.dataobject.diy.DiyPageDO;
 import cn.iocoder.yudao.module.promotion.dal.dataobject.diy.DiyTemplateDO;
 import cn.iocoder.yudao.module.promotion.service.diy.DiyPageService;
 import cn.iocoder.yudao.module.promotion.service.diy.DiyTemplateService;
+import cn.iocoder.yudao.module.promotion.service.diy.DiyExportService;
+import jakarta.servlet.http.HttpServletResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +19,12 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import cn.iocoder.yudao.module.promotion.service.diy.DiyImportService;
+import cn.iocoder.yudao.module.promotion.controller.admin.diy.vo.DiyImportRespVO;
 
 import java.util.List;
 
@@ -32,6 +40,32 @@ public class DiyTemplateController {
     private DiyTemplateService diyTemplateService;
     @Resource
     private DiyPageService diyPageService;
+
+    @Resource
+    private DiyImportService diyImportService;
+
+    @Resource
+    private DiyExportService diyExportService;
+
+    @GetMapping("/export")
+    @Operation(summary = "下载装修模板 ZIP")
+    @PreAuthorize("@ss.hasPermission('promotion:diy-template:query')")
+    public void exportTemplate(@RequestParam("id") Long id, HttpServletResponse response) throws Exception {
+        byte[] zip = diyExportService.exportTemplate(id);
+        response.setContentType("application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=\"diy-template-" + id + ".zip\"");
+        response.setContentLength(zip.length);
+        response.getOutputStream().write(zip);
+    }
+
+    @PostMapping(value = "/import", consumes = "multipart/form-data")
+    @Operation(summary = "导入装修 ZIP 包")
+    @PreAuthorize("@ss.hasPermission('promotion:diy-template:create')")
+    public CommonResult<DiyImportRespVO> importPackage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("name") @NotBlank @Size(max = 64) String name) throws IOException {
+        return success(diyImportService.importPackage(file, name, true));
+    }
 
     @PostMapping("/create")
     @Operation(summary = "创建装修模板")

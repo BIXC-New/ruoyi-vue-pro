@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import cn.iocoder.yudao.module.promotion.service.diy.DiyImportService;
+import cn.iocoder.yudao.module.promotion.controller.admin.diy.vo.DiyImportRespVO;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,6 +34,18 @@ public class DiyPageController {
 
     @Resource
     private DiyPageService diyPageService;
+
+    @Resource
+    private DiyImportService diyImportService;
+
+    @PostMapping(value = "/import", consumes = "multipart/form-data")
+    @Operation(summary = "导入装修 ZIP 包")
+    @PreAuthorize("@ss.hasPermission('promotion:diy-page:create')")
+    public CommonResult<DiyImportRespVO> importPackage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("name") @NotBlank @Size(max = 64) String name) throws IOException {
+        return success(diyImportService.importPackage(file, name, false));
+    }
 
     @PostMapping("/create")
     @Operation(summary = "创建装修页面")

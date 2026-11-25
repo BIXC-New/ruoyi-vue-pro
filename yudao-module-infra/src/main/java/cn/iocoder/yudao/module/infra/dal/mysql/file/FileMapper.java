@@ -14,6 +14,10 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface FileMapper extends BaseMapperX<FileDO> {
+    default java.util.List<FileDO> selectListByUrls(java.util.Collection<String> urls) {
+        return selectList(new LambdaQueryWrapperX<FileDO>().in(FileDO::getUrl, urls).orderByDesc(FileDO::getId));
+    }
+
 
     default PageResult<FileDO> selectPage(FilePageReqVO reqVO) {
         return selectPage(reqVO, new LambdaQueryWrapperX<FileDO>()

@@ -106,6 +106,11 @@ public class FileServiceImpl implements FileService {
     private FileMapper fileMapper;
 
     @Override
+    public List<FileDO> getFileListByUrls(java.util.Collection<String> urls) {
+        return urls == null || urls.isEmpty() ? List.of() : fileMapper.selectListByUrls(urls);
+    }
+
+    @Override
     public PageResult<FileDO> getFilePage(FilePageReqVO pageReqVO) {
         return fileMapper.selectPage(pageReqVO);
     }
