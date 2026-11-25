@@ -35,6 +35,7 @@ import cn.iocoder.yudao.module.pay.service.channel.PayChannelService;
 import cn.iocoder.yudao.module.pay.service.notify.PayNotifyService;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -144,8 +145,20 @@ public class PayOrderServiceImpl implements PayOrderService {
                 .setStatus(PayOrderStatusEnum.WAITING.getStatus())
                 // 退款相关字段
                 .setRefundPrice(0);
-        orderMapper.insert(order);
-        return order.getId();
+        try {
+            orderMapper.insert(order);
+            return order.getId();
+        } catch (DuplicateKeyException e) {
+            // 并发请求可能同时通过前置查询；由 (app_id, merchant_order_id) 唯一索引裁决后，复用赢家创建的支付单
+            PayOrderDO existingOrder = orderMapper.selectByAppIdAndMerchantOrderId(
+                    app.getId(), reqDTO.getMerchantOrderId());
+            if (existingOrder != null) {
+                log.warn("[createOrder][appId({}) merchantOrderId({}) 并发创建冲突，复用支付单({})]",
+                        app.getId(), reqDTO.getMerchantOrderId(), existingOrder.getId());
+                return existingOrder.getId();
+            }
+            throw exception(CREATE_ORDER_NOT_ALLOW);
+        }
     }
 
     @Override // 注意，这里不能添加事务注解，避免调用支付渠道失败时，将 PayOrderExtensionDO 回滚了
